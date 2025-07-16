@@ -1,0 +1,4 @@
+env: 'dev'
+storage_path: 'postgres://postgres:password@localhost:5432/student_db?sslmode=disable'
+http_server:
+  address: 'localhost:8082'
