@@ -2,7 +2,6 @@ package config
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 
@@ -39,7 +38,6 @@ func LoadEnv() Config {
 	var cfg Config
 
 	err := cleanenv.ReadConfig(configPath, &cfg)
-	fmt.Println(err)
 	if err != nil {
 
 		log.Fatal("Please pass correct config file")
