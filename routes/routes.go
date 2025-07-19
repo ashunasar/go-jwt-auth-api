@@ -21,9 +21,10 @@ func Routes() *http.ServeMux {
 		var signUpBody SignUpBody
 
 		err := json.NewDecoder(r.Body).Decode(&signUpBody)
-		if errors.Is(err, io.EOF) {
 
-			w.Write([]byte("Empty Body Provided"))
+		if errors.Is(err, io.EOF) {
+			// w.Write([]byte("Empty Body Provided"))
+			// json.NewEncoder(w).Encode(map[string]string{"error": "Empty body"})
 			return
 		}
 
