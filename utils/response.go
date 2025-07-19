@@ -12,9 +12,9 @@ const (
 
 type Response struct {
 	Status string `json:"status"`
-	Error  string `json:"error"`
-	Messge string `json:"message"`
-	Data   any    `json:"data"`
+	Error  string `json:"error,omitempty"`
+	Messge string `json:"message,omitempty"`
+	Data   any    `json:"data,omitempty"`
 }
 
 func WriteJson(w http.ResponseWriter, statutCode int, data any) error {
@@ -27,7 +27,6 @@ func WriteJson(w http.ResponseWriter, statutCode int, data any) error {
 }
 
 func GeneralError(err error) Response {
-
 	return Response{
 		Status: StatusError,
 		Error:  err.Error(),

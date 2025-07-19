@@ -3,8 +3,11 @@ package routes
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/ashunasar/go-jwt-auth-api/utils"
 )
 
 type SignUpBody struct {
@@ -21,10 +24,12 @@ func Routes() *http.ServeMux {
 		var signUpBody SignUpBody
 
 		err := json.NewDecoder(r.Body).Decode(&signUpBody)
-
 		if errors.Is(err, io.EOF) {
-			// w.Write([]byte("Empty Body Provided"))
-			// json.NewEncoder(w).Encode(map[string]string{"error": "Empty body"})
+			utils.WriteJson(w, http.StatusBadRequest, utils.GeneralError(fmt.Errorf("empty request body")))
+			return
+		} else if err != nil {
+
+			utils.WriteJson(w, http.StatusBadRequest, utils.GeneralError(err))
 			return
 		}
 
