@@ -8,11 +8,12 @@ import (
 	"net/http"
 
 	"github.com/ashunasar/go-jwt-auth-api/utils"
+	"github.com/go-playground/validator/v10"
 )
 
 type SignUpBody struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8,max=15"`
 }
 
 func Routes() *http.ServeMux {
@@ -28,12 +29,17 @@ func Routes() *http.ServeMux {
 			utils.WriteJson(w, http.StatusBadRequest, utils.GeneralError(fmt.Errorf("empty request body")))
 			return
 		} else if err != nil {
-
 			utils.WriteJson(w, http.StatusBadRequest, utils.GeneralError(err))
 			return
 		}
+		if err := validator.New().Struct(signUpBody); err != nil {
+			fmt.Printf("type of err %T", err)
+			validationErrs := err.(validator.ValidationErrors)
+			utils.WriteJson(w, http.StatusBadRequest, utils.ValidationErrors(validationErrs))
+			return
+		}
 
-		w.Write([]byte("from post api"))
+		utils.WriteJson(w, http.StatusAccepted, utils.GeneralResponse("everything looks good"))
 
 	})
 
