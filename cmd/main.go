@@ -13,7 +13,8 @@ import (
 func main() {
 
 	cfg := config.LoadEnv()
-	_, err := database.New(cfg.DbPath)
+
+	err := database.Connect(cfg.DbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
