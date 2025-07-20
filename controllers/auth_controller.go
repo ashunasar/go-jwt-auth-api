@@ -44,7 +44,14 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.SignAccessToken(id)
+	accessToken, err := utils.SignAccessToken(id)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
+	refreshToken, err := utils.SignRefreshToken(id)
 
 	if err != nil {
 		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
@@ -52,11 +59,12 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJson(w, http.StatusOK, utils.GeneralResponse(map[string]any{
-		"id":       id,
-		"name":     user.Name,
-		"email":    user.Email,
-		"password": user.Password,
-		"token":    token,
+		"id":           id,
+		"name":         user.Name,
+		"email":        user.Email,
+		"password":     user.Password,
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
 	}))
 
 }

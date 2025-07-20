@@ -23,3 +23,19 @@ func SignAccessToken(userId uuid.UUID) (string, error) {
 	return signedToken, err
 
 }
+
+func SignRefreshToken(userId uuid.UUID) (string, error) {
+
+	claims := jwt.MapClaims{
+		"user_id": userId,
+		"exp":     time.Now().Add(60 * 24 * time.Hour).Unix(), // Token expires in 60 days
+		"iat":     time.Now().Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	signedToken, err := token.SignedString([]byte(config.ConfigData.RefreshTokenSecret))
+
+	return signedToken, err
+
+}
