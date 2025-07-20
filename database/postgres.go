@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"log/slog"
 	"time"
 
@@ -73,5 +74,26 @@ func CreateUser(user models.User) (uuid.UUID, error) {
 	fmt.Println("id is ", user.Id)
 
 	return user.Id, err
+
+}
+
+func GetUseByEmail(email string) (uuid.UUID, error) {
+
+	var id uuid.UUID
+
+	query := `Select Id from users where email = $1`
+
+	err := Db.QueryRow(query, email).Scan(&id)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			fmt.Println("No user found with that email")
+			return uuid.Nil, nil
+		}
+		log.Printf("Query error: %v\n", err)
+		return uuid.Nil, err
+	}
+
+	return id, nil
 
 }
