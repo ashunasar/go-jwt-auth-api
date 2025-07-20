@@ -62,7 +62,6 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		"id":           id,
 		"name":         user.Name,
 		"email":        user.Email,
-		"password":     user.Password,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	}))
