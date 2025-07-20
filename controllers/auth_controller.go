@@ -20,7 +20,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	user := models.User{Email: body.Email, Name: body.Name, Password: body.Password}
 
-	existingUserId, _ := database.GetUseByEmail(user.Email)
+	existingUserId, _, _ := database.GetUserByEmail(user.Email)
 
 	if existingUserId != uuid.Nil {
 		utils.WriteJson(w, http.StatusOK, utils.GeneralError(fmt.Errorf("user with email Id %s already exist ", user.Email)))
@@ -62,6 +62,51 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		"id":           id,
 		"name":         user.Name,
 		"email":        user.Email,
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
+	}))
+
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	body, ok := middleware.GetRequestBody[models.LoginBody](r)
+	if !ok {
+		return
+	}
+
+	userId, password, _ := database.GetUserByEmail(body.Email)
+
+	if userId == uuid.Nil {
+		utils.WriteJson(w, http.StatusOK, utils.GeneralError(fmt.Errorf("user with email Id %s is not registered", body.Email)))
+		return
+
+	}
+
+	isCorrectPassword := utils.ComparePassword(password, body.Password)
+
+	if !isCorrectPassword {
+		utils.WriteJson(w, http.StatusOK, utils.GeneralError(fmt.Errorf("incorrect password")))
+		return
+
+	}
+
+	accessToken, err := utils.SignAccessToken(userId)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
+	refreshToken, err := utils.SignRefreshToken(userId)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, utils.GeneralResponse(map[string]any{
+		"id":           userId,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	}))

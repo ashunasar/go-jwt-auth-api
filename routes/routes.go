@@ -13,6 +13,7 @@ func Routes() *http.ServeMux {
 	router := http.NewServeMux()
 
 	router.HandleFunc("POST /api/auth/signup", middleware.ValidateRequest[models.SignUpBody](controllers.SignUpHandler))
+	router.HandleFunc("POST /api/auth/login", middleware.ValidateRequest[models.LoginBody](controllers.LoginHandler))
 
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello world Bro !"))

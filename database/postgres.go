@@ -74,22 +74,23 @@ func CreateUser(user models.User) (uuid.UUID, error) {
 
 }
 
-func GetUseByEmail(email string) (uuid.UUID, error) {
+func GetUserByEmail(email string) (uuid.UUID, string, error) {
 
+	var password string
 	var id uuid.UUID
 
-	query := `Select Id from users where email = $1`
+	query := `Select id, password from users where email = $1`
 
-	err := Db.QueryRow(query, email).Scan(&id)
+	err := Db.QueryRow(query, email).Scan(&id, &password)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return uuid.Nil, nil
+			return uuid.Nil, "", err
 		}
 		log.Printf("Query error: %v\n", err)
-		return uuid.Nil, err
+		return uuid.Nil, "", err
 	}
 
-	return id, nil
+	return id, password, nil
 
 }
