@@ -37,9 +37,17 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	user.Password = password
 
 	id, err := database.CreateUser(user)
+
 	if err != nil {
 
-		utils.WriteJson(w, http.StatusOK, utils.GeneralError(err))
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
+	token, err := utils.SignAccessToken(id)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
 		return
 	}
 
@@ -48,6 +56,7 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		"name":     user.Name,
 		"email":    user.Email,
 		"password": user.Password,
+		"token":    token,
 	}))
 
 }

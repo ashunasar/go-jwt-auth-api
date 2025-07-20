@@ -2,3 +2,5 @@ env: 'dev'
 db_path: 'postgres://postgres:password@localhost:5432/student_db?sslmode=disable'
 http_server:
   address: 'localhost:8082'
+access_token_secret: dwOLkm/JfZVSzjokW+/LgHSkwDrgkLQckDklO+mllvKBuRrL0fYZ+5TUOh96zSZH
+refresh_token_secret: GnweXVAqRrCFB3MWVfHl0AHMx6Ct0kXpEgBHd2Doop1AfjwPNl28RVBa+IG4thyo

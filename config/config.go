@@ -13,10 +13,14 @@ type HTTPServer struct {
 }
 
 type Config struct {
-	Env        string `yaml:"env" env-required:"true"`
-	DbPath     string `yaml:"db_path" env-required:"true"`
-	HTTPServer `yaml:"http_server"`
+	Env                string `yaml:"env" env-required:"true"`
+	DbPath             string `yaml:"db_path" env-required:"true"`
+	AccessTokenSecret  string `yaml:"access_token_secret" env-required:"true"`
+	RefreshTokenSecret string `yaml:"refresh_token_secret" env-required:"true"`
+	HTTPServer         `yaml:"http_server"`
 }
+
+var ConfigData Config
 
 func LoadEnv() Config {
 
@@ -42,6 +46,9 @@ func LoadEnv() Config {
 
 		log.Fatal("Please pass correct config file")
 	}
+
+	ConfigData = cfg
+
 	return cfg
 
 }
