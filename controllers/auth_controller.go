@@ -28,6 +28,14 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	password, err := utils.HashPassword(user.Password)
+
+	if err != nil {
+		return
+
+	}
+	user.Password = password
+
 	id, err := database.CreateUser(user)
 	if err != nil {
 
@@ -37,9 +45,9 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJson(w, http.StatusOK, utils.GeneralResponse(map[string]any{
 		"id":       id,
-		"name":     body.Name,
-		"email":    body.Email,
-		"password": body.Password,
+		"name":     user.Name,
+		"email":    user.Email,
+		"password": user.Password,
 	}))
 
 }
