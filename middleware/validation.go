@@ -7,14 +7,18 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/ashunasar/go-jwt-auth-api/utils"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 )
 
 type contextKey string
 
 const RequestBodyKey contextKey = "requestBody"
+
+const UserIdKey contextKey = "UserIdKey "
 
 var validate = validator.New()
 
@@ -46,8 +50,37 @@ func ValidateRequest[T any](next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func CheckAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		authToken := r.Header.Get("Authorization")
+
+		if authToken == "" {
+			utils.WriteJson(w, http.StatusUnauthorized, utils.GeneralError(fmt.Errorf("auth token not provided")))
+			return
+		}
+
+		splitToken := strings.Split(authToken, "Bearer ")
+		authToken = splitToken[1]
+
+		id, err := utils.VerifyAccessToken(authToken)
+		if err != nil {
+
+			utils.WriteJson(w, http.StatusUnauthorized, utils.GeneralError(err))
+			return
+		}
+		ctx := context.WithValue(r.Context(), UserIdKey, id)
+		next(w, r.WithContext(ctx))
+	}
+}
+
 // Helper function to get validated body from context
 func GetRequestBody[T any](r *http.Request) (T, bool) {
 	body, ok := r.Context().Value(RequestBodyKey).(T)
 	return body, ok
+}
+
+func GetUserID(r *http.Request) (uuid.UUID, bool) {
+	userID, ok := r.Context().Value(UserIdKey).(uuid.UUID)
+	return userID, ok
 }

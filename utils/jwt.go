@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/ashunasar/go-jwt-auth-api/config"
@@ -21,6 +22,41 @@ func SignAccessToken(userId uuid.UUID) (string, error) {
 	signedToken, err := token.SignedString([]byte(config.ConfigData.AccessTokenSecret))
 
 	return signedToken, err
+
+}
+
+func VerifyAccessToken(tokenString string) (uuid.UUID, error) {
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpted signing method: %v", token.Header["alg"])
+
+		}
+		return []byte(config.ConfigData.AccessTokenSecret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return uuid.Nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return uuid.Nil, fmt.Errorf("could not parse claims")
+	}
+
+	userIdStr, ok := claims["user_id"].(string)
+	if !ok {
+		return uuid.Nil, fmt.Errorf("user_id not found in token")
+	}
+
+	userId, err := uuid.Parse(userIdStr)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid user_id format: %v", err)
+	}
+
+	return userId, nil
 
 }
 
