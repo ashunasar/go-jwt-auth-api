@@ -69,6 +69,9 @@ func ValidationErrors(errs validator.ValidationErrors) Response {
 
 		case "max":
 			errMsg.WriteString(fmt.Sprintf("field %s must be at most %s characters", field, err.Param()))
+
+		case "jwt":
+			errMsg.WriteString(fmt.Sprintf("field %s must be a valid jwt token", field))
 		}
 	}
 

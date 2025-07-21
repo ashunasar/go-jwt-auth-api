@@ -75,3 +75,38 @@ func SignRefreshToken(userId uuid.UUID) (string, error) {
 	return signedToken, err
 
 }
+
+func VerifyRefreshToken(tokenString string) (uuid.UUID, error) {
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpted signing method: %v", token.Header["alg"])
+
+		}
+		return []byte(config.ConfigData.RefreshTokenSecret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return uuid.Nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+
+	if !ok {
+		return uuid.Nil, fmt.Errorf("could not parse claims")
+	}
+
+	userIdStr, ok := claims["user_id"].(string)
+	if !ok {
+		return uuid.Nil, fmt.Errorf("user_id not found in token")
+	}
+
+	userId, err := uuid.Parse(userIdStr)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid user_id format: %v", err)
+	}
+
+	return userId, nil
+
+}

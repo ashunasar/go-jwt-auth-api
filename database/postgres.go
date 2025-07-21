@@ -94,3 +94,36 @@ func GetUserByEmail(email string) (uuid.UUID, string, error) {
 	return id, password, nil
 
 }
+
+func GetRefreshTokenById(id uuid.UUID, refreshToken string) (uuid.UUID, string, error) {
+
+	query := `Select id, refresh_token from users where id = $1 and  refresh_token=$2`
+
+	err := Db.QueryRow(query, id, refreshToken).Scan(&id, &refreshToken)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return uuid.Nil, "", err
+		}
+		log.Printf("Query error: %v\n", err)
+		return uuid.Nil, "", err
+	}
+
+	return id, refreshToken, nil
+
+}
+
+func UpdateRefreshToken(id uuid.UUID, refreshToken string) error {
+
+	query := `update users set refresh_token=$1 where id=$2`
+
+	_, err := Db.Exec(query, refreshToken, id)
+
+	if err != nil {
+		log.Printf("Query error: %v\n", err)
+		return err
+	}
+
+	return nil
+
+}

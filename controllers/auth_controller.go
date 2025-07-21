@@ -58,6 +58,13 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = database.UpdateRefreshToken(id, refreshToken)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
 	utils.WriteJson(w, http.StatusOK, utils.GeneralResponse(map[string]any{
 		"id":           id,
 		"name":         user.Name,
@@ -105,8 +112,67 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = database.UpdateRefreshToken(userId, refreshToken)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
 	utils.WriteJson(w, http.StatusOK, utils.GeneralResponse(map[string]any{
 		"id":           userId,
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
+	}))
+
+}
+
+func RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
+
+	body, ok := middleware.GetRequestBody[models.RefreshTokenBody](r)
+
+	if !ok {
+		return
+	}
+
+	id, err := utils.VerifyRefreshToken(body.RefreshToken)
+
+	if err != nil {
+
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(fmt.Errorf("invalid refresh token")))
+		return
+	}
+
+	_, _, err = database.GetRefreshTokenById(id, body.RefreshToken)
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(fmt.Errorf("invalid refresh token")))
+		return
+
+	}
+
+	accessToken, err := utils.SignAccessToken(id)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
+	refreshToken, err := utils.SignRefreshToken(id)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
+	err = database.UpdateRefreshToken(id, refreshToken)
+
+	if err != nil {
+		utils.WriteJson(w, http.StatusInternalServerError, utils.GeneralError(err))
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, utils.GeneralResponse(map[string]any{
+		"id":           id,
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
 	}))

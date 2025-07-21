@@ -14,6 +14,7 @@ func Routes() *http.ServeMux {
 
 	router.HandleFunc("POST /api/auth/signup", middleware.ValidateRequest[models.SignUpBody](controllers.SignUpHandler))
 	router.HandleFunc("POST /api/auth/login", middleware.ValidateRequest[models.LoginBody](controllers.LoginHandler))
+	router.HandleFunc("POST /api/auth/refresh-token", middleware.ValidateRequest[models.RefreshTokenBody](controllers.RefreshTokenHandler))
 
 	router.HandleFunc("GET /api/home", middleware.CheckAuth(controllers.HomeHndler))
 	router.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
