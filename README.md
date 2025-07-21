@@ -135,24 +135,45 @@ CREATE TABLE IF NOT EXISTS users (
 
 ---
 
-## 🚀 How to Run
+## 🛠 Setup Instructions
 
-1. Clone the repo:
-   `git clone https://github.com/ashunasar/go-jwt-auth-api`
+### 1. Clone the Repository
 
-2. Create a `.env` file and configure DB connection.
+```bash
+git clone https://github.com/ashunasar/go-jwt-auth-api.git
+cd go-jwt-auth-api
+```
 
-3. Install dependencies:
+### 2. Create `local.yaml`
 
-   ```bash
-   go mod tidy
-   ```
+In the root of your project, create a `local.yaml` file with the following structure:
 
-4. Run the server:
+```yaml
+env: '<environment>'
+db_path: '<your_postgres_connection_string>'
+http_server:
+  address: '<host>:<port>'
+access_token_secret: '<your_access_token_secret>'
+refresh_token_secret: '<your_refresh_token_secret>'
+```
 
-   ```bash
-   go run cmd/main.go
-   ```
+> Example for `db_path`: `postgres://postgres:yourpassword@localhost:5432/student_db?sslmode=disable`
+
+---
+
+### 3. Install Dependencies
+
+```bash
+go mod tidy
+```
+
+### 4. Run the Application
+
+```bash
+go run cmd/main.go
+```
+
+Your API should now be running on: `http://localhost:8082`
 
 ---
 
