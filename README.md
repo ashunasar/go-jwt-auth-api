@@ -1,45 +1,50 @@
-# Go JWT Auth with PostgreSQL – Project Plan (Clean Architecture)
+# Go JWT Auth API with PostgreSQL – Clean Architecture
 
 ---
 
 ## 📁 Folder Structure
 
 ```
-go-auth-jwt-postgres/
+go-jwt-auth-api/
 │
 ├── cmd/
 │   └── main.go                  # Entry point
 │
 ├── config/
-│   └── config.go                # Load .env and app config
+│   └── config.go                # Load environment and app config
 │
 ├── controllers/
-│   └── auth_controller.go       # Signup/Login
-│   └── user_controller.go       # Protected route
-│
-├── middleware/
-│   └── auth_middleware.go       # JWT middleware
-│
-├── models/
-│   └── user.go                  # User model definition
-│
-├── routes/
-│   └── routes.go                # Route initialization
-│
-├── services/
-│   └── auth_service.go          # Token generation/validation logic
-│
-├── utils/
-│   └── hash.go                  # Password hashing
-│   └── response.go              # JSON responses
+│   ├── auth_controller.go       # Signup, Login, Refresh Token logic
+│   └── home_controller.go       # Protected route logic
 │
 ├── database/
-│   └── postgres.go              # DB connection and migration
+│   └── postgres.go              # PostgreSQL DB connection and queries
+│
+├── middleware/
+│   └── validation.go            # Input validation and auth middleware
+│
+├── models/
+│   ├── auth_body.go             # Signup/Login/Refresh request structs
+│   └── users.go                 # User model
+│
+├── routes/
+│   └── routes.go                # Route setup and initialization
+│
+├── utils/
+│   ├── hash.go                  # Password hashing & comparison
+│   ├── jwt.go                   # Access and refresh token logic
+│   └── response.go              # Standard JSON response formatting
+│
+├── tmp/                         # Temp build artifacts/logs
+│   ├── build-errors.log
+│   └── main
 │
 ├── go.mod
-├── .env
+├── go.sum
+├── local.yaml
+├── .env                         # Env variables
+├── go-jwt.postman_collection.json
 └── README.md
-
 ```
 
 ---
@@ -48,8 +53,9 @@ go-auth-jwt-postgres/
 
 - Golang
 - PostgreSQL
-- JWT
-- bcrypt for hashing
+- JWT (Access & Refresh Tokens)
+- bcrypt for password hashing
+- UUIDs for user IDs
 - go-playground/validator for input validation
 
 ---
@@ -58,35 +64,47 @@ go-auth-jwt-postgres/
 
 ### ➕ Signup
 
-- Validate email format
-- Validate password strength
-- Check if email exists
-- Create user with hashed password and UUID
-- Return JWT access & refresh tokens
+- Validates email format and password rules
+- Checks if the email already exists
+- Creates user with hashed password and UUID
+- Returns Access & Refresh JWT tokens
 
 ### 🔑 Login
 
-- Validate credentials
-- Return new access & refresh tokens
+- Validates credentials
+- Returns new JWT Access & Refresh tokens
 
 ### 🔁 Refresh Token
 
-- Verify stored refresh token
-- Return new tokens
-- Update DB with latest refresh token
+- Verifies existing stored refresh token
+- Generates and returns new access & refresh tokens
+- Updates DB with new refresh token
 
-### 🔐 Protected Route (/home)
+### 🔐 Protected Route (/api/home)
 
-- Access only with valid access token
-- Return user's info
+- Requires valid access token
+- Returns user info
 
 ---
 
-## 🧹 Database Schema (PostgreSQL)
+## 🔄 API Routes
+
+| Method | Path                      | Description                   |
+| ------ | ------------------------- | ----------------------------- |
+| POST   | `/api/auth/signup`        | Register a new user           |
+| POST   | `/api/auth/login`         | Log in with credentials       |
+| POST   | `/api/auth/refresh-token` | Get new access/refresh tokens |
+| GET    | `/api/home`               | Protected route (JWT req.)    |
+| GET    | `/`                       | Hello world route             |
+
+---
+
+## 🧹 PostgreSQL User Table Schema
 
 ```sql
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL,
   refresh_token TEXT,
@@ -97,7 +115,7 @@ CREATE TABLE users (
 
 ---
 
-## 📦 Packages to Use
+## 📦 Required Packages
 
 | Purpose           | Package                                |
 | ----------------- | -------------------------------------- |
@@ -105,28 +123,43 @@ CREATE TABLE users (
 | UUID              | github.com/google/uuid                 |
 | Validation        | github.com/go-playground/validator/v10 |
 | Hashing           | golang.org/x/crypto/bcrypt             |
-| Env Config        | github.com/joho/godotenv               |
+| Env Loader        | github.com/joho/godotenv               |
 | PostgreSQL Driver | github.com/lib/pq                      |
 
 ---
 
 ## ⏳ Token Expiry
 
-- Access Token: 1 hour
-- Refresh Token: 60 days
+- Access Token: **1 hour**
+- Refresh Token: **60 days**
 
 ---
 
-## 🚀 Next Steps
+## 🚀 How to Run
 
-1. Set up Go module and environment config
-2. Build PostgreSQL connection & user migration
-3. Implement Signup API
-4. Add Login API
-5. Add Refresh Token endpoint
-6. Add JWT Middleware and Protected route
-7. Clean up and document
+1. Clone the repo:
+   `git clone https://github.com/ashunasar/go-jwt-auth-api`
+
+2. Create a `.env` file and configure DB connection.
+
+3. Install dependencies:
+
+   ```bash
+   go mod tidy
+   ```
+
+4. Run the server:
+
+   ```bash
+   go run cmd/main.go
+   ```
 
 ---
 
-> This project is perfect for learning authentication, middleware, token handling, and clean architecture in Go!
+## 📬 Contact
+
+Created by [Ashu Nasar](https://github.com/ashunasar) — feel free to reach out if you have questions or want to contribute!
+
+---
+
+> This project is perfect for learning clean architecture, authentication with JWT, Go middleware patterns, and working with PostgreSQL!
